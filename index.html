@@ -201,7 +201,7 @@
     }
 
     document.getElementById('todoInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addTodo();
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addTodo();
     });
 
     render();
