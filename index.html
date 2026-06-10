@@ -127,6 +127,44 @@
       font-size: 14px;
       padding: 24px 0;
     }
+
+    .io-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .io-row button {
+      flex: 1;
+      padding: 9px 0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    button.export-btn {
+      background: #f5f5f5;
+      color: #444;
+      border: 1.5px solid #ddd;
+    }
+
+    button.export-btn:hover {
+      background: #ececec;
+    }
+
+    button.import-btn {
+      background: #f5f5f5;
+      color: #444;
+      border: 1.5px solid #ddd;
+    }
+
+    button.import-btn:hover {
+      background: #ececec;
+    }
   </style>
 </head>
 <body>
@@ -138,6 +176,11 @@
     </div>
     <ul id="todoList"></ul>
     <p class="empty" id="emptyMsg">タスクがありません</p>
+    <div class="io-row">
+      <button class="export-btn" onclick="exportTodos()">エクスポート</button>
+      <button class="import-btn" onclick="document.getElementById('importInput').click()">インポート</button>
+      <input type="file" id="importInput" accept=".json" style="display:none" onchange="importTodos(event)" />
+    </div>
   </div>
 
   <script>
@@ -198,6 +241,34 @@
       todos.splice(index, 1);
       save();
       render();
+    }
+
+    function exportTodos() {
+      const blob = new Blob([JSON.stringify(todos, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'todos.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function importTodos(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported)) throw new Error();
+          todos = imported;
+          save();
+          render();
+        } catch {
+          alert('JSONファイルの形式が正しくありません');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
     }
 
     document.getElementById('todoInput').addEventListener('keydown', (e) => {
